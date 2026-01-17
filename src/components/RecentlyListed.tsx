@@ -41,9 +41,9 @@ export default function RecentlyListedNFTs() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
           {activeListings.map((listing) => (
             <NFTBox
-              key={`${listing.network}-${listing.contractAddress}-${listing.tokenId}`}
+              key={`${listing.nftAddress}-${listing.tokenId}`}
               tokenId={listing.tokenId}
-              contractAddress={listing.contractAddress}
+              contractAddress={listing.nftAddress}
               price={listing.price}
             />
           ))}

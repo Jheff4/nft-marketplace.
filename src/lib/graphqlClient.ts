@@ -1,10 +1,14 @@
-const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || 'http://localhost:3001/graphql';
+const GRAPHQL_ENDPOINT =
+  process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT || "http://localhost:3001/graphql";
 
-export async function fetchGraphQL(query: string, variables?: Record<string, any>) {
+export async function fetchGraphQL(
+  query: string,
+  variables?: Record<string, any>
+) {
   const response = await fetch(GRAPHQL_ENDPOINT, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       query,
@@ -12,42 +16,39 @@ export async function fetchGraphQL(query: string, variables?: Record<string, any
     }),
   });
 
-  if (!response.ok) {
-    throw new Error(`GraphQL request failed: ${response.statusText}`);
+  const text = await response.text();
+
+  let json;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    throw new Error(`Non-JSON response: ${text}`);
   }
 
-  const json = await response.json();
+  if (!response.ok) {
+    throw new Error(
+      `GraphQL HTTP ${response.status}:\n${JSON.stringify(json, null, 2)}`
+    );
+  }
 
   if (json.errors) {
-    throw new Error(`GraphQL errors: ${JSON.stringify(json.errors)}`);
+    throw new Error(
+      `GraphQL execution error:\n${JSON.stringify(json.errors, null, 2)}`
+    );
   }
 
   return json.data;
 }
 
-// Helper function to fetch all pages of data
+
+/**
+ * NON-PAGINATED helper
+ * Use this ONLY for queries that return { nodes }
+ */
 export async function fetchAllPages<T>(
   query: string,
-  dataKey: string,
-  pageSize: number = 100
+  dataKey: string
 ): Promise<T[]> {
-  let allData: T[] = [];
-  let hasNextPage = true;
-  let cursor: string | null = null;
-
-  while (hasNextPage) {
-    const variables = {
-      first: pageSize,
-      ...(cursor && { after: cursor }),
-    };
-
-    const data = await fetchGraphQL(query, variables);
-    const connection = data[dataKey];
-
-    allData = [...allData, ...connection.nodes];
-    hasNextPage = connection.pageInfo.hasNextPage;
-    cursor = connection.pageInfo.endCursor;
-  }
-
-  return allData;
+  const data = await fetchGraphQL(query);
+  return data[dataKey].nodes as T[];
 }

@@ -9,11 +9,11 @@ import type { ItemListed, ItemBought, ItemCanceled, ActiveListing } from "../typ
 
 // Helper function to create a unique key for an NFT
 function createNFTKey(item: {
-  contractAddress: string;
+  // contractAddress: string;
+  nftAddress: string;
   tokenId: string | null;
-  network: string;
 }): string {
-  return `${item.network}-${item.contractAddress}-${item.tokenId}`.toLowerCase();
+  return `${item.nftAddress}-${item.tokenId}`.toLowerCase();
 }
 
 // Filter out bought and canceled items from listed items
@@ -26,21 +26,21 @@ function getActiveListings(
   const removedNFTs = new Set<string>();
 
   bought.forEach((item) => {
-    if (item.tokenId && item.contractAddress) {
-      removedNFTs.add(createNFTKey(item));
+    if (item.tokenId && item.nftAddress) {
+      removedNFTs.add(createNFTKey(item as any));
     }
   });
 
   canceled.forEach((item) => {
-    if (item.tokenId && item.contractAddress) {
-      removedNFTs.add(createNFTKey(item));
+    if (item.tokenId && item.nftAddress) {
+      removedNFTs.add(createNFTKey(item as any));
     }
   });
 
   // Filter listed items to only include active listings
   return listed
     .filter((item) => {
-      if (!item.tokenId || !item.contractAddress || !item.price) {
+      if (!item.tokenId || !item.nftAddress || !item.price) {
         return false;
       }
       const key = createNFTKey(item);
@@ -48,11 +48,9 @@ function getActiveListings(
     })
     .map((item) => ({
       tokenId: item.tokenId!,
-      contractAddress: item.contractAddress,
+      nftAddress: item.nftAddress,
       price: item.price!,
       seller: item.seller || "",
-      network: item.network,
-      blockTimestamp: item.blockTimestamp || "",
     }));
 }
 

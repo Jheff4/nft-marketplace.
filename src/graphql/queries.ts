@@ -1,8 +1,7 @@
 export const GET_ALL_LISTED_ITEMS = `
-  query GetAllListedItems($first: Int, $after: Cursor) {
+  query GetAllListedItems($first: Int) {
     allItemListeds(
-      first: 20
-      after: $after
+      first: $first
       orderBy: [BLOCK_NUMBER_DESC, TX_INDEX_DESC]
     ) {
       nodes {
@@ -14,53 +13,29 @@ export const GET_ALL_LISTED_ITEMS = `
         price
         txHash
         blockNumber
-        blockTimestamp
-        network
       }
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-      totalCount
+     
     }
   }
 `;
 
 export const GET_ALL_BOUGHT_ITEMS = `
-  query GetAllBoughtItems($first: Int, $after: Cursor) {
-    allItemBoughts(
-      first: $first
-      after: $after
-    ) {
+  query GetAllBoughtItems {
+    allItemBoughts {
       nodes {
-        contractAddress
         nftAddress
         tokenId
-        network
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
       }
     }
   }
 `;
 
 export const GET_ALL_CANCELED_ITEMS = `
-  query GetAllCanceledItems($first: Int, $after: Cursor) {
-    allItemCanceleds(
-      first: $first
-      after: $after
-    ) {
+  query GetAllCanceledItems {
+    allItemCanceleds {
       nodes {
-        contractAddress
         nftAddress
         tokenId
-        network
-      }
-      pageInfo {
-        hasNextPage
-        endCursor
       }
     }
   }
