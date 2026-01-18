@@ -58,23 +58,18 @@ export function useActiveListings() {
   return useQuery({
     queryKey: ["activeListings"],
     queryFn: async () => {
-      // Fetch all data in parallel
-      const [listedItems, boughtItems, canceledItems] = await Promise.all([
+      const [listed, bought, canceled] = await Promise.all([
         fetchAllPages<ItemListed>(GET_ALL_LISTED_ITEMS, "allItemListeds"),
         fetchAllPages<ItemBought>(GET_ALL_BOUGHT_ITEMS, "allItemBoughts"),
         fetchAllPages<ItemCanceled>(GET_ALL_CANCELED_ITEMS, "allItemCanceleds"),
       ]);
 
-      // Filter to get only active listings
-      const activeListings = getActiveListings(
-        listedItems,
-        boughtItems,
-        canceledItems
-      );
-
-      return activeListings;
+      return { listed, bought, canceled };
     },
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
-    refetchInterval: 1000 * 60, // Refetch every minute
+    select: ({ listed, bought, canceled }) =>
+      getActiveListings(listed, bought, canceled),
+
+    staleTime: 1000 * 60 * 5,
+    refetchInterval: 1000 * 60,
   });
 }
